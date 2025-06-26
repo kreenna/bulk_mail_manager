@@ -17,7 +17,7 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(BulkMail)
 class BulkMailAdmin(admin.ModelAdmin):
-    list_display = ("id", "finished_at", "status", "message", "receivers")
+    list_display = ("id", "finished_at", "status", "message")
     list_filter = ("status",)
     search_fields = ("message", "receivers")
 
