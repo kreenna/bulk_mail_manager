@@ -26,6 +26,7 @@ class Message(models.Model):
 class BulkMail(models.Model):
     STATUS_CHOICES = [("finished", "Завершена"), ("created", "Создана"), ("started", "Запущена")]
 
+    name = models.CharField(max_length=250, unique=True, verbose_name="Название рассылки")
     sent_at = models.DateTimeField(auto_now_add=True)
     finished_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="created", verbose_name="Статус")

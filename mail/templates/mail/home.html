@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Спам-тон{% endblock %}
+{% block content %}
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Спам-тон</h1>
+    <p class="lead">Спам-тон - это отличный сайт для управления вашим спамом.</p>
+</div>
+
+<div class="container text-center" style="max-width: 1100px;">
+    <div class="row justify-content-start row-cols-4">
+        <div class="col-3 mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Рассылки</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="/mail/mails/">Все рассылки</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-3 mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Получатели</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="/mail/receivers/">Все получатели</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-3 mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Сообщения</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="/mail/messages/">Все сообщения</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

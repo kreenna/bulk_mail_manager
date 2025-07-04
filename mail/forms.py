@@ -1,0 +1,49 @@
+from django import forms
+
+from .models import Receiver, Message, BulkMail
+
+
+class ReceiverForm(forms.ModelForm):
+    class Meta:
+        model = Receiver
+        fields = ["email", "full_name", "comment"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name in self.fields.keys():  # получаем названия полей
+
+            self.fields[field_name].widget.attrs.update({  # присваиваем значения полям на основании перебора
+                "class": "form-control",
+
+            })
+
+
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ["subject", "content"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name in self.fields.keys():  # получаем названия полей
+
+            self.fields[field_name].widget.attrs.update({  # присваиваем значения полям на основании перебора
+                "class": "form-control",
+            })
+
+
+class BulkMailForm(forms.ModelForm):
+    class Meta:
+        model = BulkMail
+        fields = ["name", "message", "receivers"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name in self.fields.keys():  # получаем названия полей
+
+            self.fields[field_name].widget.attrs.update({  # присваиваем значения полям на основании перебора
+                "class": "form-control",
+            })
