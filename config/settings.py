@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     'mail',
     'users',
+    'widget_tweaks'
 ]
 
 MIDDLEWARE = [

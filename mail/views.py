@@ -1,21 +1,34 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect
 from django.shortcuts import render
 from django.urls import reverse_lazy, reverse
+from django.views import View
 from django.views.generic import DetailView, CreateView, ListView, UpdateView, DeleteView
 
 from mail.forms import MessageForm, ReceiverForm, BulkMailForm
 from mail.models import Receiver, Message, BulkMail
+from .services import send_bulk_mail
 
 
 def home_view(request):
-    return render(request, "mail/home.html")
+    total_bulk_mails = BulkMail.objects.count()
+    active_bulk_mails = BulkMail.objects.filter(status="Запущена").count()
+    unique_receivers = Receiver.objects.count()
+
+    context = {
+        "total_bulk_mails": total_bulk_mails,
+        "active_bulk_mails": active_bulk_mails,
+        "unique_receivers": unique_receivers,
+    }
+    return render(request, "mail/home.html", context)
 
 
 class ReceiverCreateView(LoginRequiredMixin, CreateView):
     model = Receiver
     form_class = ReceiverForm
     template_name = "mail/receiver_form.html"
-    success_url = reverse_lazy("mail:messages")
+    success_url = reverse_lazy("mail:receivers")
 
 
 class ReceiverListView(ListView):
@@ -114,3 +127,11 @@ class BulkMailDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "mail/delete_form.html"
     context_object_name = "mail"
     success_url = reverse_lazy("mail:mails")
+
+
+class ManualSendBulkMailView(View):
+    def post(self, request, pk):
+        bulk_mail = get_object_or_404(BulkMail, pk=pk)
+        send_bulk_mail(bulk_mail)
+        messages.success(request, "Рассылка отправлена (попытка зафиксирована)")
+        return redirect("mail:mail_detail", pk=pk)

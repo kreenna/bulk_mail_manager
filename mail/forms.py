@@ -37,7 +37,10 @@ class MessageForm(forms.ModelForm):
 class BulkMailForm(forms.ModelForm):
     class Meta:
         model = BulkMail
-        fields = ["name", "message", "receivers"]
+        fields = ["name", "message", "receivers", "status"]
+        widgets = {
+            "receivers": forms.SelectMultiple(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -8,8 +8,14 @@
 </div>
 
 <div class="container text-center" style="max-width: 1100px;">
-    <div class="row justify-content-start row-cols-4">
-        <div class="col-3 mt-3">
+    <h3>Всего рассылок: {{ total_bulk_mails }}</h3>
+    <h3>Активных рассылок: {{ active_bulk_mails }}</h3>
+    <h3>Уникальных получателей: {{ unique_receivers }}</h3>
+</div>
+
+<div class="container text-center" style="max-width: 1100px;">
+    <div class="row justify-content-start row-cols-3">
+        <div class="col mt-3">
             <div class="card mb-4 box-shadow h-100">
                 <div class="card-header">
                     <h4 class="my-0 font-weight-normal">Рассылки</h4>
@@ -20,7 +26,7 @@
             </div>
         </div>
 
-        <div class="col-3 mt-3">
+        <div class="col mt-3">
             <div class="card mb-4 box-shadow h-100">
                 <div class="card-header">
                     <h4 class="my-0 font-weight-normal">Получатели</h4>
@@ -31,7 +37,7 @@
             </div>
         </div>
 
-        <div class="col-3 mt-3">
+        <div class="col mt-3">
             <div class="card mb-4 box-shadow h-100">
                 <div class="card-header">
                     <h4 class="my-0 font-weight-normal">Сообщения</h4>
