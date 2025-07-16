@@ -8,12 +8,18 @@
                 <h1 class="">{{ user.first_name }} {{ user.last_name }}</h1>
                 <div class="fs-5 mt-3">
                     <p>Электронная почта: {{ user.email }}</p>
+                    <p>Всего отправлено сообщений: {{ total_bulk_mails }}</p>
+                    <p>Успешных попыток рассылки: {{ attempts_success }}</p>
+                    <p>Неудачных попыток рассылки: {{ attempts_fail }}</p>
                 </div>
             </div>
             <div class="d-grid gap-0 row-gap-3">
                 <a class="p-2 btn btn-lg btn-outline-primary" href="/profile/edit/{{ user.id }}">Редактировать</a>
                 <a class="p-2 btn btn-lg btn-outline-primary" href="/password_change/">Смена пароля</a>
                 <a class="p-2 btn btn-lg btn-outline-danger" href="/profile/delete/{{ user.id }}">Удалить профиль</a>
+                {% if perms.users.can_block_users %}
+                <a class="p-2 btn btn-lg btn-outline-primary" href="/blogs/post/edit/{{ post.id }}">Заблокировать</a>
+                {% endif %}
                 <a class="p-2 btn btn-lg btn-outline-secondary" href="/">Назад</a>
             </div>
         </div>

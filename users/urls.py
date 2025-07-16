@@ -3,7 +3,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
 
 from users.apps import UsersConfig
-from users.views import RegisterView, ProfileDetailView, ProfileUpdateView, ProfileDeleteView, CustomPasswordChangeView, \
+from users.views import RegisterView, UsersListView, ProfileDetailView, ProfileUpdateView, ProfileDeleteView, CustomPasswordChangeView, \
     activate
 
 app_name = UsersConfig.name
@@ -20,4 +20,5 @@ urlpatterns = [
     path('password_change/done/',
          auth_views.PasswordChangeDoneView.as_view(template_name='users/password_change_done.html'),
          name='password_change_done'),
+    path('users/users_list/', UsersListView.as_view(), name='users_list'),
 ]

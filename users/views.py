@@ -1,19 +1,22 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.core.mail import send_mail
-from django.shortcuts import render, redirect
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode
 from django.utils.http import urlsafe_base64_encode
-from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
-from django.conf import settings
+from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
+from django.views.generic import View
 
+from mail.models import BulkMailAttempt
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import CustomUser
 
@@ -75,9 +78,23 @@ def activate(request, uidb64, token):
         return render(request, "activation_invalid.html")
 
 
-class ProfileDetailView(DetailView):
+class UsersListView(ListView):
+    model = CustomUser
+    template_name = "users/users_list.html"
+    context_object_name = "users"
+
+
+class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = CustomUser
     template_name = "users/profile.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context["total_bulk_mails"] = user.bulk_mails.count()
+        context["attempts_success"] = BulkMailAttempt.objects.filter(bulk_mail__owner=user, status="Успешно").count()
+        context["attempts_fail"] = BulkMailAttempt.objects.filter(bulk_mail__owner=user, status="Не успешно").count()
+        return context
 
 
 class ProfileUpdateView(UpdateView):
@@ -116,3 +133,16 @@ class EmailVerificationTokenGenerator(PasswordResetTokenGenerator):
 
 
 email_verification_token = EmailVerificationTokenGenerator()
+
+
+class BlockUserView(LoginRequiredMixin, View):
+    def post(self, request, user_id):
+        user = get_object_or_404(CustomUser, id=user_id)
+
+        if not request.user.has_perm("products.can_block_user"):
+            return HttpResponseForbidden("У вас нет прав для блокировки пользователей.")
+
+        user.is_banned = True
+        user.save()
+
+        return redirect("mail:home")
