@@ -8,7 +8,9 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     is_blocked = models.BooleanField(default=False)
     phone_number = PhoneNumberField(verbose_name="Телефон")
-    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True, verbose_name="Аватар")
+    avatar = models.ImageField(
+        upload_to="avatars/", blank=True, null=True, verbose_name="Аватар"
+    )
     country = models.CharField(max_length=200, verbose_name="Страна")
 
     USERNAME_FIELD = "email"
