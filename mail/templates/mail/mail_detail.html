@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load user_tags %}
 {% block title %}Рассылка{% endblock %}
 {% block content %}
 
@@ -10,22 +11,16 @@
     <div class="row gx-5">
         <div class="col">
             <div class="p-3">
-                {% if product.image %}
-                <img src="{{ product.image.url }}" class="img-fluid">
-                {% else %}
-                <img src="https://i.ibb.co/7x5DJnsJ/cato.png" class="img-fluid">
-                {% endif %}
-            </div>
-        </div>
-        <div class="col">
-            <div class="p-3">
-                <h1 class="text-center">{{ mail.name }}</h1>
-                <h2 class="text-center">{{ mail.messages }}</h2>
-                <h2 class="text-center">{{ mail.receivers }}</h2>
+                <h2 class="text-center">{{ mail.message.subject }}</h2>
+                <h4 class="text-center">{{ mail.message.content }}</h4>
+                <h5 class="text-center">Статус: {{ mail.status }}</h5>
             </div>
             <div class="d-grid gap-0 row-gap-3">
                 <a class="p-2 btn btn-lg btn-outline-primary" href="/mail/edit/{{ mail.id }}">Редактировать</a>
                 <a class="p-2 btn btn-lg btn-outline-danger" href="/mail/delete/{{ mail.id }}">Удалить</a>
+                {% if perms.mail.can_disable_mail %}
+                <a class="p-2 btn btn-lg btn-outline-danger" href="/mail/stop/{{ mail.id }}">Завершить рассылку</a>
+                {% endif %}
                 <a class="p-2 btn btn-lg btn-outline-secondary" href="/mail/mails/">Назад</a>
             </div>
         </div>

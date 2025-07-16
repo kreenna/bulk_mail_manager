@@ -41,6 +41,8 @@ INSTALLED_APPS = [
 
     'mail',
     'users',
+    'widget_tweaks',
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [

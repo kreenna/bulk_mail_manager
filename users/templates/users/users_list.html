@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-    <h1 class="display-4">Рассылки</h1>
+    <h1 class="display-4">Пользователи</h1>
 </div>
 
 <div class="container text-center" style="max-width: 1100px;">
@@ -13,14 +13,14 @@
                style="--bs-btn-padding-y: 2.6rem; --bs-btn-padding-x: 4.569rem; --bs-btn-font-size: 10.00rem;"
                href="/mail/mail/create/">+</a>
         </div>
-        {% for mail in mails %}
+        {% for user in users %}
         <div class="col-3 mt-3">
             <div class="card mb-4 box-shadow h-100">
                 <div class="card-header">
-                    <h4 class="my-0 font-weight-normal">{{ mail.name }}</h4>
+                    <h4 class="my-0 font-weight-normal">{{ user.email }}</h4>
                 </div>
                 <div class="card-body text-center">
-                    <a class="p-2 btn btn-primary" href="/mail/mail/detail/{{ mail.id }}">Подробнее</a>
+                    <a class="p-2 btn btn-primary" href="/profile/{{ user.id }}">Подробнее</a>
                 </div>
             </div>
         </div>

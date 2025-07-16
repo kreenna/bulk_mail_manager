@@ -37,13 +37,15 @@ class MessageForm(forms.ModelForm):
 class BulkMailForm(forms.ModelForm):
     class Meta:
         model = BulkMail
-        fields = ["name", "message", "receivers"]
+        fields = ["name", "message", "receivers", "status"]
+        widgets = {
+            "receivers": forms.SelectMultiple(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for field_name in self.fields.keys():  # получаем названия полей
-
             self.fields[field_name].widget.attrs.update({  # присваиваем значения полям на основании перебора
                 "class": "form-control",
             })
