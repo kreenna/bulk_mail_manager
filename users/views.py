@@ -1,23 +1,24 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
-from django.core.mail import send_mail
+from django.core.cache import cache
+from django.core.mail import EmailMessage, send_mail
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_decode
-from django.utils.http import urlsafe_base64_encode
-from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
-from django.views.generic import View
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.views.decorators.cache import cache_page
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  UpdateView, View)
 
 from mail.models import BulkMailAttempt
-from .forms import CustomUserCreationForm, CustomUserChangeForm
+
+from .forms import CustomUserChangeForm, CustomUserCreationForm
 from .models import CustomUser
 
 
@@ -51,13 +52,16 @@ class RegisterView(CreateView):
         token = email_verification_token.make_token(user)
         from_email = "qwarekree@yandex.ru"
         protocol = "https" if request.is_secure() else "http"
-        message = render_to_string("users/activation_email.txt", {
-            "user": user,
-            "domain": current_site.domain,
-            "uid": uid,
-            "token": token,
-            "protocol": protocol,
-        })
+        message = render_to_string(
+            "users/activation_email.txt",
+            {
+                "user": user,
+                "domain": current_site.domain,
+                "uid": uid,
+                "token": token,
+                "protocol": protocol,
+            },
+        )
         email = EmailMessage(mail_subject, message, from_email, to=[user.email])
         email.send()
 
@@ -83,7 +87,17 @@ class UsersListView(ListView):
     template_name = "users/users_list.html"
     context_object_name = "users"
 
+    def get_queryset(self):
+        queryset = cache.get("users_list_queryset")
+        if not queryset:
+            queryset = super().get_queryset()
+            cache.set(
+                "users_list_queryset", queryset, 60 * 15
+            )  # кешируем данные на 15 минут
+        return queryset
 
+
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = CustomUser
     template_name = "users/profile.html"
@@ -92,8 +106,12 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         context["total_bulk_mails"] = user.bulk_mails.count()
-        context["attempts_success"] = BulkMailAttempt.objects.filter(bulk_mail__owner=user, status="Успешно").count()
-        context["attempts_fail"] = BulkMailAttempt.objects.filter(bulk_mail__owner=user, status="Не успешно").count()
+        context["attempts_success"] = BulkMailAttempt.objects.filter(
+            bulk_mail__owner=user, status="Успешно"
+        ).count()
+        context["attempts_fail"] = BulkMailAttempt.objects.filter(
+            bulk_mail__owner=user, status="Не успешно"
+        ).count()
         return context
 
 

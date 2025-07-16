@@ -1,15 +1,18 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden
-from django.shortcuts import get_object_or_404, redirect
-from django.shortcuts import render
-from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.generic import DetailView, CreateView, ListView, UpdateView, DeleteView
+from django.views.decorators.cache import cache_page
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  UpdateView)
 
-from mail.forms import MessageForm, ReceiverForm, BulkMailForm
-from mail.models import Receiver, Message, BulkMail, BulkMailAttempt
-from .mixins import OwnerRequiredMixin, BlockedUserMixin
+from mail.forms import BulkMailForm, MessageForm, ReceiverForm
+from mail.models import BulkMail, BulkMailAttempt, Message, Receiver
+
+from .mixins import BlockedUserMixin, OwnerRequiredMixin
 from .services import send_bulk_mail
 
 
@@ -36,13 +39,18 @@ class ReceiverCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
         form.instance.owner = self.request.user  # назначаем владельца
         return super().form_valid(form)
 
+
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class ReceiverListView(LoginRequiredMixin, BlockedUserMixin, ListView):
     model = Receiver
     template_name = "mail/receivers.html"
     context_object_name = "receivers"
 
     def get_queryset(self):
-        if self.request.user.groups.filter(name="managers").exists() or self.request.user.is_staff:
+        if (
+            self.request.user.groups.filter(name="managers").exists()
+            or self.request.user.is_staff
+        ):
             return Receiver.objects.all()
         return Receiver.objects.filter(owner=self.request.user)
 
@@ -53,7 +61,9 @@ class ReceiverDetailView(LoginRequiredMixin, BlockedUserMixin, DetailView):
     context_object_name = "receiver"
 
 
-class ReceiverUpdateView(LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, UpdateView):
+class ReceiverUpdateView(
+    LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, UpdateView
+):
     model = Receiver
     form_class = ReceiverForm
     template_name = "mail/receiver_form.html"
@@ -62,7 +72,9 @@ class ReceiverUpdateView(LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixi
         return reverse("mail:receiver_detail", kwargs={"pk": self.object.pk})
 
 
-class ReceiverDeleteView(LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, DeleteView):
+class ReceiverDeleteView(
+    LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, DeleteView
+):
     model = Receiver
     template_name = "mail/delete_form.html"
     context_object_name = "receiver"
@@ -80,10 +92,19 @@ class MessageCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
         return super().form_valid(form)
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class MessageListView(ListView):
     model = Message
     template_name = "mail/messages.html"
     context_object_name = "messages"
+
+    def get_queryset(self):
+        if (
+            self.request.user.groups.filter(name="managers").exists()
+            or self.request.user.is_staff
+        ):
+            return Message.objects.all()
+        return Message.objects.filter(owner=self.request.user)
 
 
 class MessageDetailView(LoginRequiredMixin, BlockedUserMixin, DetailView):
@@ -122,18 +143,24 @@ class BulkMailCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
         if all_success:
             messages.success(self.request, "Рассылка создана и отправлена успешно.")
         else:
-            messages.warning(self.request, "Рассылка создана, однако при отправке возникли ошибки.")
+            messages.warning(
+                self.request, "Рассылка создана, однако при отправке возникли ошибки."
+            )
 
         return response
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class BulkMailListView(LoginRequiredMixin, ListView):
     model = BulkMail
     template_name = "mail/mails.html"
     context_object_name = "mails"
 
     def get_queryset(self):
-        if self.request.user.groups.filter(name="managers").exists() or self.request.user.is_staff:
+        if (
+            self.request.user.groups.filter(name="managers").exists()
+            or self.request.user.is_staff
+        ):
             return BulkMail.objects.all()
         return BulkMail.objects.filter(owner=self.request.user)
 
@@ -144,7 +171,9 @@ class BulkMailDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "mail"
 
 
-class BulkMailUpdateView(LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, UpdateView):
+class BulkMailUpdateView(
+    LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, UpdateView
+):
     model = BulkMail
     form_class = BulkMailForm
     template_name = "mail/mail_form.html"
@@ -166,7 +195,9 @@ class BulkMailStopView(LoginRequiredMixin, View):
         return redirect("mail:mails")
 
 
-class BulkMailDeleteView(LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, DeleteView):
+class BulkMailDeleteView(
+    LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, DeleteView
+):
     model = BulkMail
     template_name = "mail/delete_form.html"
     context_object_name = "mail"
@@ -181,12 +212,16 @@ class ManualSendBulkMailView(View):
         return redirect("mail:mail_detail", pk=pk)
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class AttemptListView(LoginRequiredMixin, ListView):
     model = BulkMailAttempt
     template_name = "mail/attempts.html"
     context_object_name = "attempts"
 
     def get_queryset(self):
-        if self.request.user.groups.filter(name="managers").exists() or self.request.user.is_staff:
+        if (
+            self.request.user.groups.filter(name="managers").exists()
+            or self.request.user.is_staff
+        ):
             return BulkMailAttempt.objects.all()
         return BulkMailAttempt.objects.filter(attempts__owner=self.request.user)
