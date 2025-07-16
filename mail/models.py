@@ -19,6 +19,7 @@ class Receiver(models.Model):
 class Message(models.Model):
     subject = models.CharField(max_length=250, verbose_name="Тема письма")
     content = models.TextField(verbose_name="Содержание")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="messages")
 
     class Meta:
         verbose_name = "Сообщение"
@@ -39,6 +40,9 @@ class BulkMail(models.Model):
     class Meta:
         verbose_name = "Рассылка"
         verbose_name_plural = "Рассылки"
+        permissions = (
+            ("can_disable_mail", "Can disable mail"),
+        )
 
 
 class BulkMailAttempt(models.Model):
@@ -47,7 +51,7 @@ class BulkMailAttempt(models.Model):
     attempted_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="successful", verbose_name="Статус")
     response = models.TextField()
-    bulk_mail = models.ForeignKey(BulkMail, on_delete=models.CASCADE, related_name="Попытки")
+    bulk_mail = models.ForeignKey(BulkMail, on_delete=models.CASCADE, related_name="attempts")
 
     class Meta:
         verbose_name = "Попытка рассылки"

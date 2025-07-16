@@ -8,7 +8,7 @@ from django.views import View
 from django.views.generic import DetailView, CreateView, ListView, UpdateView, DeleteView
 
 from mail.forms import MessageForm, ReceiverForm, BulkMailForm
-from mail.models import Receiver, Message, BulkMail
+from mail.models import Receiver, Message, BulkMail, BulkMailAttempt
 from .mixins import OwnerRequiredMixin, BlockedUserMixin
 from .services import send_bulk_mail
 
@@ -32,6 +32,9 @@ class ReceiverCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
     template_name = "mail/receiver_form.html"
     success_url = reverse_lazy("mail:receivers")
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user  # назначаем владельца
+        return super().form_valid(form)
 
 class ReceiverListView(LoginRequiredMixin, BlockedUserMixin, ListView):
     model = Receiver
@@ -72,6 +75,10 @@ class MessageCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
     template_name = "mail/message_form.html"
     success_url = reverse_lazy("mail:messages")
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user  # назначаем владельца
+        return super().form_valid(form)
+
 
 class MessageListView(ListView):
     model = Message
@@ -109,7 +116,15 @@ class BulkMailCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user  # назначаем владельца
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        all_success, _ = send_bulk_mail(self.object)
+
+        if all_success:
+            messages.success(self.request, "Рассылка создана и отправлена успешно.")
+        else:
+            messages.warning(self.request, "Рассылка создана, однако при отправке возникли ошибки.")
+
+        return response
 
 
 class BulkMailListView(LoginRequiredMixin, ListView):
@@ -164,3 +179,14 @@ class ManualSendBulkMailView(View):
         send_bulk_mail(bulk_mail)
         messages.success(request, "Рассылка отправлена (попытка зафиксирована)")
         return redirect("mail:mail_detail", pk=pk)
+
+
+class AttemptListView(LoginRequiredMixin, ListView):
+    model = BulkMailAttempt
+    template_name = "mail/attempts.html"
+    context_object_name = "attempts"
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name="managers").exists() or self.request.user.is_staff:
+            return BulkMailAttempt.objects.all()
+        return BulkMailAttempt.objects.filter(attempts__owner=self.request.user)

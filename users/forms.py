@@ -7,7 +7,7 @@ from users.models import CustomUser
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = CustomUser
-        fields = ("email", "first_name", "last_name", "password1", "password2")
+        fields = ("email", "first_name", "last_name", "phone_number", "country", "password1", "password2", "avatar")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,7 +23,7 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomUserChangeForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ("email", "first_name", "last_name")
+        fields = ("email", "first_name", "last_name", "phone_number", "country", "avatar")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -18,7 +18,7 @@
             <div class="d-grid gap-0 row-gap-3">
                 <a class="p-2 btn btn-lg btn-outline-primary" href="/mail/edit/{{ mail.id }}">Редактировать</a>
                 <a class="p-2 btn btn-lg btn-outline-danger" href="/mail/delete/{{ mail.id }}">Удалить</a>
-                {% if user|has_group:"managers" or user.is_staff %}
+                {% if perms.mail.can_disable_mail %}
                 <a class="p-2 btn btn-lg btn-outline-danger" href="/mail/stop/{{ mail.id }}">Завершить рассылку</a>
                 {% endif %}
                 <a class="p-2 btn btn-lg btn-outline-secondary" href="/mail/mails/">Назад</a>

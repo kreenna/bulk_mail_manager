@@ -4,7 +4,7 @@ from mail.apps import MailConfig
 from mail.views import home_view, ReceiverCreateView, ReceiverDetailView, ReceiverUpdateView, ReceiverListView, \
     ReceiverDeleteView, \
     MessageCreateView, MessageDetailView, MessageUpdateView, MessageListView, MessageDeleteView, BulkMailCreateView, \
-    BulkMailDetailView, BulkMailUpdateView, BulkMailListView, BulkMailStopView, BulkMailDeleteView
+    BulkMailDetailView, BulkMailUpdateView, BulkMailListView, BulkMailStopView, BulkMailDeleteView, AttemptListView
 
 app_name = MailConfig.name
 
@@ -28,4 +28,6 @@ urlpatterns = [
     path('mail/edit/<int:pk>/', BulkMailUpdateView.as_view(), name='mail_edit'),
     path('mail/delete/<int:pk>/', BulkMailDeleteView.as_view(), name='mail_delete'),
     path('mail/stop/<int:pk>/', BulkMailStopView.as_view(), name='mail_stop'),
+
+    path('mail/attempts/', AttemptListView.as_view(), name='attempts'),
 ]
