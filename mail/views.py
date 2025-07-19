@@ -104,11 +104,6 @@ class MessageListView(ListView):
     context_object_name = "messages"
 
     def get_queryset(self):
-        if (
-            self.request.user.groups.filter(name="managers").exists()
-            or self.request.user.is_staff
-        ):
-            return Message.objects.all()
         return Message.objects.filter(owner=self.request.user)
 
 

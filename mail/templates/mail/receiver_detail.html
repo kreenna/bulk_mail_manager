@@ -15,8 +15,11 @@
                 {% if user == receiver.owner %}
                 <a class="p-2 btn btn-lg btn-outline-primary"
                    href="{% url 'mail:receiver_edit' receiver.id %}">Редактировать</a>
-                <a class="p-2 btn btn-lg btn-outline-danger"
-                   href="{% url 'mail:receiver_delete' receiver.id %}">Удалить</a>
+                <form method="post" action="{% url 'mail:receiver_delete' receiver.id %}" class="d-grid gap-0"
+                      style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2 btn btn-lg btn-outline-danger">Удалить</button>
+                </form>
                 {% endif %}
                 <a class="p-2 btn btn-lg btn-outline-secondary" href="{% url 'mail:receivers' %}">Назад</a>
             </div>

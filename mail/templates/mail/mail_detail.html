@@ -27,7 +27,11 @@
                 {% endif %}
                 <a class="p-2 btn btn-lg btn-outline-primary"
                    href="{% url 'mail:mail_edit' mail.id %}">Редактировать</a>
-                <a class="p-2 btn btn-lg btn-outline-danger" href="{% url 'mail:mail_delete' mail.id %}">Удалить</a>
+                <form method="post" action="{% url 'mail:mail_delete' mail.id %}" class="d-grid gap-0"
+                      style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2 btn btn-lg btn-outline-danger">Удалить</button>
+                </form>
                 {% endif %}
                 {% if perms.mail.can_disable_mail and mail.status != "Завершена" %}
                 <form method="post" action="{% url 'mail:mail_stop' mail.id %}" class="d-grid gap-0"
