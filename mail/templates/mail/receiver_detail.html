@@ -12,10 +12,13 @@
                 </div>
             </div>
             <div class="d-grid gap-0 row-gap-3">
+                {% if user == receiver.owner %}
                 <a class="p-2 btn btn-lg btn-outline-primary"
-                   href="/mail/receiver/edit/{{ receiver.id }}">Редактировать</a>
-                <a class="p-2 btn btn-lg btn-outline-danger" href="/mail/receiver/delete/{{ receiver.id }}">Удалить</a>
-                <a class="p-2 btn btn-lg btn-outline-secondary" href="/mail/receivers/">Назад</a>
+                   href="{% url 'mail:receiver_edit' receiver.id %}">Редактировать</a>
+                <a class="p-2 btn btn-lg btn-outline-danger"
+                   href="{% url 'mail:receiver_delete' receiver.id %}">Удалить</a>
+                {% endif %}
+                <a class="p-2 btn btn-lg btn-outline-secondary" href="{% url 'mail:receivers' %}">Назад</a>
             </div>
         </div>
     </div>

@@ -4,5 +4,5 @@
 
 {% block content %}
 <h2>К сожалению, ваш аккаунт был заблокирован.</h2>
-<a href="/login/" class="btn btn-outline-primary">Понятно</a>
+<a href="{% url 'users:login' %}" class="btn btn-outline-primary">Понятно</a>
 {% endblock %}

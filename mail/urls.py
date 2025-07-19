@@ -1,14 +1,27 @@
 from django.urls import path
 
 from mail.apps import MailConfig
-from mail.views import (AttemptListView, BulkMailCreateView,
-                        BulkMailDeleteView, BulkMailDetailView,
-                        BulkMailListView, BulkMailStopView, BulkMailUpdateView,
-                        MessageCreateView, MessageDeleteView,
-                        MessageDetailView, MessageListView, MessageUpdateView,
-                        ReceiverCreateView, ReceiverDeleteView,
-                        ReceiverDetailView, ReceiverListView,
-                        ReceiverUpdateView, home_view)
+from mail.views import (
+    AttemptListView,
+    BulkMailCreateView,
+    BulkMailDeleteView,
+    BulkMailDetailView,
+    BulkMailListView,
+    BulkMailStopView,
+    BulkMailUpdateView,
+    ManualSendBulkMailView,
+    MessageCreateView,
+    MessageDeleteView,
+    MessageDetailView,
+    MessageListView,
+    MessageUpdateView,
+    ReceiverCreateView,
+    ReceiverDeleteView,
+    ReceiverDetailView,
+    ReceiverListView,
+    ReceiverUpdateView,
+    home_view,
+)
 
 app_name = MailConfig.name
 
@@ -55,4 +68,5 @@ urlpatterns = [
     path("mail/delete/<int:pk>/", BulkMailDeleteView.as_view(), name="mail_delete"),
     path("mail/stop/<int:pk>/", BulkMailStopView.as_view(), name="mail_stop"),
     path("mail/attempts/", AttemptListView.as_view(), name="attempts"),
+    path("mail/<int:pk>/send/", ManualSendBulkMailView.as_view(), name="mail_send"),
 ]

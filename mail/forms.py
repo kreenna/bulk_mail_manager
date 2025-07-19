@@ -46,7 +46,13 @@ class BulkMailForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+
+        if user:
+            # Assuming Message and Receiver have a ForeignKey 'owner' to the User model
+            self.fields["message"].queryset = Message.objects.filter(owner=user)
+            self.fields["receivers"].queryset = Receiver.objects.filter(owner=user)
 
         for field_name in self.fields.keys():  # получаем названия полей
             self.fields[field_name].widget.attrs.update(

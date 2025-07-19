@@ -21,6 +21,13 @@ class BulkMailAdmin(admin.ModelAdmin):
     list_filter = ("status",)
     search_fields = ("message", "receivers")
 
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "messages":
+            kwargs["queryset"] = Message.objects.filter(owner=request.user)
+        if db_field.name == "receivers":
+            kwargs["queryset"] = Receiver.objects.filter(owner=request.user)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
 
 @admin.register(BulkMailAttempt)
 class BulkMailAttemptAdmin(admin.ModelAdmin):

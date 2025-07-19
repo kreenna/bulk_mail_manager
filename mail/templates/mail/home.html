@@ -23,7 +23,7 @@
                     <h4 class="my-0 font-weight-normal">Рассылки</h4>
                 </div>
                 <div class="card-body text-center">
-                    <a class="p-2 btn btn-primary" href="/mail/mails/">Все рассылки</a>
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:mails' %}">Все рассылки</a>
                 </div>
             </div>
         </div>
@@ -34,7 +34,7 @@
                     <h4 class="my-0 font-weight-normal">Получатели</h4>
                 </div>
                 <div class="card-body text-center">
-                    <a class="p-2 btn btn-primary" href="/mail/receivers/">Все получатели</a>
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:receivers' %}">Все получатели</a>
                 </div>
             </div>
         </div>
@@ -45,7 +45,18 @@
                     <h4 class="my-0 font-weight-normal">Сообщения</h4>
                 </div>
                 <div class="card-body text-center">
-                    <a class="p-2 btn btn-primary" href="/mail/messages/">Все сообщения</a>
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:messages' %}">Все сообщения</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Попытки</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:attempts' %}">Все попытки</a>
                 </div>
             </div>
         </div>
@@ -57,7 +68,7 @@
                     <h4 class="my-0 font-weight-normal">Пользователи</h4>
                 </div>
                 <div class="card-body text-center">
-                    <a class="p-2 btn btn-primary" href="/users/users_list/">Все пользователи</a>
+                    <a class="p-2 btn btn-primary" href="{% url 'users:users_list' %}">Все пользователи</a>
                 </div>
             </div>
         </div>

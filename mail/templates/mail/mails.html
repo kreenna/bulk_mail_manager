@@ -11,7 +11,7 @@
         <div class="col-3 mt-3">
             <a class="btn btn-light pt-0"
                style="--bs-btn-padding-y: 2.6rem; --bs-btn-padding-x: 4.569rem; --bs-btn-font-size: 10.00rem;"
-               href="/mail/mail/create/">+</a>
+               href="{% url 'mail:mail_create' %}">+</a>
         </div>
         {% for mail in mails %}
         <div class="col-3 mt-3">
@@ -20,7 +20,7 @@
                     <h4 class="my-0 font-weight-normal">{{ mail.name }}</h4>
                 </div>
                 <div class="card-body text-center">
-                    <a class="p-2 btn btn-primary" href="/mail/mail/detail/{{ mail.id }}">Подробнее</a>
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:mail_detail' mail.id%}">Подробнее</a>
                 </div>
             </div>
         </div>

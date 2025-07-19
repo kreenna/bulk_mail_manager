@@ -1,13 +1,19 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.cache import cache_page
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  UpdateView)
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
 
 from mail.forms import BulkMailForm, MessageForm, ReceiverForm
 from mail.models import BulkMail, BulkMailAttempt, Message, Receiver
@@ -40,7 +46,6 @@ class ReceiverCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
         return super().form_valid(form)
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
 class ReceiverListView(LoginRequiredMixin, BlockedUserMixin, ListView):
     model = Receiver
     template_name = "mail/receivers.html"
@@ -72,6 +77,7 @@ class ReceiverUpdateView(
         return reverse("mail:receiver_detail", kwargs={"pk": self.object.pk})
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class ReceiverDeleteView(
     LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, DeleteView
 ):
@@ -92,7 +98,6 @@ class MessageCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
         return super().form_valid(form)
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
 class MessageListView(ListView):
     model = Message
     template_name = "mail/messages.html"
@@ -122,6 +127,7 @@ class MessageUpdateView(LoginRequiredMixin, BlockedUserMixin, UpdateView):
         return reverse("mail:message_detail", kwargs={"pk": self.object.pk})
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class MessageDeleteView(LoginRequiredMixin, BlockedUserMixin, DeleteView):
     model = Message
     template_name = "mail/delete_form.html"
@@ -135,22 +141,30 @@ class BulkMailCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
     template_name = "mail/mail_form.html"
     success_url = reverse_lazy("mail:mails")
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         form.instance.owner = self.request.user  # назначаем владельца
-        response = super().form_valid(form)
-        all_success, _ = send_bulk_mail(self.object)
+        return super().form_valid(form)
+
+
+class ManualSendBulkMailView(View):
+    def post(self, request, pk):
+        bulk_mail = get_object_or_404(BulkMail, pk=pk)
+
+        all_success, _ = send_bulk_mail(bulk_mail)
 
         if all_success:
-            messages.success(self.request, "Рассылка создана и отправлена успешно.")
+            messages.success(self.request, "Рассылка отправлена успешно.")
         else:
-            messages.warning(
-                self.request, "Рассылка создана, однако при отправке возникли ошибки."
-            )
+            messages.warning(self.request, "При отправке рассылки возникли ошибки.")
 
-        return response
+        return redirect("mail:mail_detail", pk=pk)
 
 
-@method_decorator(cache_page(60 * 15), name="dispatch")
 class BulkMailListView(LoginRequiredMixin, ListView):
     model = BulkMail
     template_name = "mail/mails.html"
@@ -170,6 +184,15 @@ class BulkMailDetailView(LoginRequiredMixin, DetailView):
     template_name = "mail/mail_detail.html"
     context_object_name = "mail"
 
+    def get_queryset(self):
+        queryset = cache.get("bulk_mail_detail_queryset")
+        if not queryset:
+            queryset = super().get_queryset()
+            cache.set(
+                "bulk_mail_detail_queryset", queryset, 60 * 15
+            )  # кешируем данные на 15 минут
+        return queryset
+
 
 class BulkMailUpdateView(
     LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, UpdateView
@@ -183,18 +206,19 @@ class BulkMailUpdateView(
 
 
 class BulkMailStopView(LoginRequiredMixin, View):
-    def post(self, request, mail_id):
-        mail = get_object_or_404(BulkMail, id=mail_id)
+    def post(self, request, pk):
+        mail = get_object_or_404(BulkMail, id=pk)
 
-        if not request.user.groups.filter(name="Менеджеры").exists():
+        if not request.user.groups.filter(name="managers").exists():
             return HttpResponseForbidden("У вас нет прав для завершения рассылок.")
 
         mail.status = "Завершена"
         mail.save()
 
-        return redirect("mail:mails")
+        return redirect("mail:mail_detail", pk)
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class BulkMailDeleteView(
     LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, DeleteView
 ):
@@ -204,15 +228,6 @@ class BulkMailDeleteView(
     success_url = reverse_lazy("mail:mails")
 
 
-class ManualSendBulkMailView(View):
-    def post(self, request, pk):
-        bulk_mail = get_object_or_404(BulkMail, pk=pk)
-        send_bulk_mail(bulk_mail)
-        messages.success(request, "Рассылка отправлена (попытка зафиксирована)")
-        return redirect("mail:mail_detail", pk=pk)
-
-
-@method_decorator(cache_page(60 * 15), name="dispatch")
 class AttemptListView(LoginRequiredMixin, ListView):
     model = BulkMailAttempt
     template_name = "mail/attempts.html"
@@ -224,4 +239,4 @@ class AttemptListView(LoginRequiredMixin, ListView):
             or self.request.user.is_staff
         ):
             return BulkMailAttempt.objects.all()
-        return BulkMailAttempt.objects.filter(attempts__owner=self.request.user)
+        return BulkMailAttempt.objects.filter(bulk_mail__owner=self.request.user)

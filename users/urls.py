@@ -3,9 +3,16 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
 
 from users.apps import UsersConfig
-from users.views import (CustomPasswordChangeView, ProfileDeleteView,
-                         ProfileDetailView, ProfileUpdateView, RegisterView,
-                         UsersListView, activate)
+from users.views import (
+    BlockUserView,
+    CustomPasswordChangeView,
+    ProfileDeleteView,
+    ProfileDetailView,
+    ProfileUpdateView,
+    RegisterView,
+    UsersListView,
+    activate,
+)
 
 app_name = UsersConfig.name
 
@@ -30,4 +37,5 @@ urlpatterns = [
         name="password_change_done",
     ),
     path("users/users_list/", UsersListView.as_view(), name="users_list"),
+    path("profile/<int:pk>/block/", BlockUserView.as_view(), name="user_block"),
 ]
