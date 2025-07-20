@@ -12,17 +12,9 @@ from django.utils.decorators import method_decorator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.decorators.cache import cache_page
-from django.views.generic import (
-    CreateView,
-    DeleteView,
-    DetailView,
-    ListView,
-    UpdateView,
-    View,
-)
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
 
 from mail.models import BulkMailAttempt
-
 from .forms import CustomUserChangeForm, CustomUserCreationForm
 from .models import CustomUser
 
@@ -91,6 +83,14 @@ class UsersListView(ListView):
     model = CustomUser
     template_name = "users/users_list.html"
     context_object_name = "users"
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name="managers").exists():
+            return [user for user in CustomUser.objects.filter(is_staff=False) if user.id != self.request.user.id]
+        elif self.request.user.is_superuser:
+            return CustomUser.objects.all()
+        else:
+            return HttpResponseForbidden("У вас нет прав для просмотра пользователей.")
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):

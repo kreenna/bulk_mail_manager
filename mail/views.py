@@ -147,7 +147,7 @@ class BulkMailCreateView(LoginRequiredMixin, BlockedUserMixin, CreateView):
 
 
 class ManualSendBulkMailView(View):
-    def post(self, request, pk):
+    def post(self, pk):
         bulk_mail = get_object_or_404(BulkMail, pk=pk)
 
         all_success, _ = send_bulk_mail(bulk_mail)
