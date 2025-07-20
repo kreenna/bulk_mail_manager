@@ -1,23 +1,21 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage, send_mail
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_decode
-from django.utils.http import urlsafe_base64_encode
-from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView
-from django.views.generic import View
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.views.decorators.cache import cache_page
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
 
 from mail.models import BulkMailAttempt
-from .forms import CustomUserCreationForm, CustomUserChangeForm
+from .forms import CustomUserChangeForm, CustomUserCreationForm
 from .models import CustomUser
 
 
@@ -51,13 +49,16 @@ class RegisterView(CreateView):
         token = email_verification_token.make_token(user)
         from_email = "qwarekree@yandex.ru"
         protocol = "https" if request.is_secure() else "http"
-        message = render_to_string("users/activation_email.txt", {
-            "user": user,
-            "domain": current_site.domain,
-            "uid": uid,
-            "token": token,
-            "protocol": protocol,
-        })
+        message = render_to_string(
+            "users/activation_email.txt",
+            {
+                "user": user,
+                "domain": current_site.domain,
+                "uid": uid,
+                "token": token,
+                "protocol": protocol,
+            },
+        )
         email = EmailMessage(mail_subject, message, from_email, to=[user.email])
         email.send()
 
@@ -83,6 +84,15 @@ class UsersListView(ListView):
     template_name = "users/users_list.html"
     context_object_name = "users"
 
+    def get_queryset(self):
+        if self.request.user.groups.filter(name="managers").exists():
+            return [user for user in CustomUser.objects.filter(is_staff=False) if
+                    not user.groups.filter(name="managers")]
+        elif self.request.user.is_superuser:
+            return CustomUser.objects.all()
+        else:
+            return HttpResponseForbidden("У вас нет прав для просмотра пользователей.")
+
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = CustomUser
@@ -90,13 +100,19 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
-        context["total_bulk_mails"] = user.bulk_mails.count()
-        context["attempts_success"] = BulkMailAttempt.objects.filter(bulk_mail__owner=user, status="Успешно").count()
-        context["attempts_fail"] = BulkMailAttempt.objects.filter(bulk_mail__owner=user, status="Не успешно").count()
+        user_to_view = self.object
+        context["user_to_view"] = user_to_view
+        context["total_bulk_mails"] = user_to_view.bulk_mails.count()
+        context["attempts_success"] = BulkMailAttempt.objects.filter(
+            bulk_mail__owner=user_to_view, status="Успешно"
+        ).count()
+        context["attempts_fail"] = BulkMailAttempt.objects.filter(
+            bulk_mail__owner=user_to_view, status="Не успешно"
+        ).count()
         return context
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class ProfileUpdateView(UpdateView):
     model = CustomUser
     form_class = CustomUserChangeForm
@@ -111,6 +127,7 @@ class ProfileUpdateView(UpdateView):
         return super().form_valid(form)
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class ProfileDeleteView(DeleteView):
     model = CustomUser
     template_name = "users/profile_delete.html"
@@ -136,13 +153,13 @@ email_verification_token = EmailVerificationTokenGenerator()
 
 
 class BlockUserView(LoginRequiredMixin, View):
-    def post(self, request, user_id):
-        user = get_object_or_404(CustomUser, id=user_id)
+    def post(self, request, pk):
+        user = get_object_or_404(CustomUser, id=pk)
 
-        if not request.user.has_perm("products.can_block_user"):
+        if not request.user.has_perm("users.can_block_users"):
             return HttpResponseForbidden("У вас нет прав для блокировки пользователей.")
 
-        user.is_banned = True
+        user.is_blocked = True
         user.save()
 
         return redirect("mail:home")

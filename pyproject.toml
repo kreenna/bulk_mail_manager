@@ -14,7 +14,13 @@ django-phonenumber-field = "^8.1.0"
 django-widget-tweaks = "^1.5.0"
 phonenumbers = "^9.0.9"
 pillow = "^11.3.0"
+redis = "^6.2.0"
 
+
+[tool.poetry.group.lint.dependencies]
+flake8 = "^7.3.0"
+black = "^25.1.0"
+isort = "^6.0.1"
 
 [build-system]
 requires = ["poetry-core"]

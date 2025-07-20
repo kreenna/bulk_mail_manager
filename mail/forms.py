@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Receiver, Message, BulkMail
+from .models import BulkMail, Message, Receiver
 
 
 class ReceiverForm(forms.ModelForm):
@@ -13,10 +13,11 @@ class ReceiverForm(forms.ModelForm):
 
         for field_name in self.fields.keys():  # получаем названия полей
 
-            self.fields[field_name].widget.attrs.update({  # присваиваем значения полям на основании перебора
-                "class": "form-control",
-
-            })
+            self.fields[field_name].widget.attrs.update(
+                {  # присваиваем значения полям на основании перебора
+                    "class": "form-control",
+                }
+            )
 
 
 class MessageForm(forms.ModelForm):
@@ -29,23 +30,33 @@ class MessageForm(forms.ModelForm):
 
         for field_name in self.fields.keys():  # получаем названия полей
 
-            self.fields[field_name].widget.attrs.update({  # присваиваем значения полям на основании перебора
-                "class": "form-control",
-            })
+            self.fields[field_name].widget.attrs.update(
+                {  # присваиваем значения полям на основании перебора
+                    "class": "form-control",
+                }
+            )
 
 
 class BulkMailForm(forms.ModelForm):
     class Meta:
         model = BulkMail
-        fields = ["name", "message", "receivers", "status"]
+        fields = ["name", "message", "receivers"]
         widgets = {
             "receivers": forms.SelectMultiple(),
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
+        if user:
+            # Assuming Message and Receiver have a ForeignKey 'owner' to the User model
+            self.fields["message"].queryset = Message.objects.filter(owner=user)
+            self.fields["receivers"].queryset = Receiver.objects.filter(owner=user)
+
         for field_name in self.fields.keys():  # получаем названия полей
-            self.fields[field_name].widget.attrs.update({  # присваиваем значения полям на основании перебора
-                "class": "form-control",
-            })
+            self.fields[field_name].widget.attrs.update(
+                {  # присваиваем значения полям на основании перебора
+                    "class": "form-control",
+                }
+            )

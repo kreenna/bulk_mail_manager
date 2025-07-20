@@ -11,7 +11,7 @@
         <div class="col-3 mt-3">
             <a class="btn btn-light pt-0"
                style="--bs-btn-padding-y: 2.6rem; --bs-btn-padding-x: 4.569rem; --bs-btn-font-size: 10.00rem;"
-               href="/mail/receiver/create/">+</a>
+               href="{% url 'mail:receiver_create' %}">+</a>
         </div>
         {% for receiver in receivers %}
         <div class="col-3 mt-3">
@@ -21,7 +21,7 @@
                 </div>
                 <div class="card-body text-center">
                     <h5>{{ message.comment|truncatechars:100 }}</h5>
-                    <a class="p-2 btn btn-primary" href="/mail/receiver/detail/{{ receiver.id }}">Подробнее</a>
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:receiver_detail' receiver.id %}">Подробнее</a>
                 </div>
             </div>
         </div>

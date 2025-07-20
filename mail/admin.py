@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Receiver, Message, BulkMail, BulkMailAttempt
+from .models import BulkMail, BulkMailAttempt, Message, Receiver
 
 
 @admin.register(Receiver)
@@ -20,6 +20,14 @@ class BulkMailAdmin(admin.ModelAdmin):
     list_display = ("id", "finished_at", "status", "message")
     list_filter = ("status",)
     search_fields = ("message", "receivers")
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if not request.user.is_superuser:
+            if db_field.name == "messages":
+                kwargs["queryset"] = Message.objects.filter(owner=request.user)
+            if db_field.name == "receivers":
+                kwargs["queryset"] = Receiver.objects.filter(owner=request.user)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 @admin.register(BulkMailAttempt)
