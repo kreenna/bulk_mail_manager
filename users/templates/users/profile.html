@@ -24,7 +24,7 @@
                     профиль</a>
                 {% endif %}
                 {% if perms.users.can_block_users and not user_to_view.is_staff and user_to_view != user %}
-                <form action="{% url 'users:user_block' user.id %}" method="post" class="d-grid gap-0"
+                <form action="{% url 'users:user_block' user_to_view.id %}" method="post" class="d-grid gap-0"
                       style="margin: 0;">
                     {% csrf_token %}
                     <button type="submit" class="p-2 btn btn-lg btn-outline-danger">Заблокировать</button>

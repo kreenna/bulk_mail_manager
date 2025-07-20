@@ -86,7 +86,8 @@ class UsersListView(ListView):
 
     def get_queryset(self):
         if self.request.user.groups.filter(name="managers").exists():
-            return [user for user in CustomUser.objects.filter(is_staff=False) if user.id != self.request.user.id]
+            return [user for user in CustomUser.objects.filter(is_staff=False) if
+                    not user.groups.filter(name="managers")]
         elif self.request.user.is_superuser:
             return CustomUser.objects.all()
         else:
@@ -155,10 +156,10 @@ class BlockUserView(LoginRequiredMixin, View):
     def post(self, request, pk):
         user = get_object_or_404(CustomUser, id=pk)
 
-        if not request.user.has_perm("users.can_block_user"):
+        if not request.user.has_perm("users.can_block_users"):
             return HttpResponseForbidden("У вас нет прав для блокировки пользователей.")
 
-        user.is_banned = True
+        user.is_blocked = True
         user.save()
 
         return redirect("mail:home")
