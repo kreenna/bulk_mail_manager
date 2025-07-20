@@ -33,7 +33,7 @@
                     <button type="submit" class="p-2 btn btn-lg btn-outline-danger">Удалить</button>
                 </form>
                 {% endif %}
-                {% if perms.mail.can_disable_mail and mail.status != "Завершена" %}
+                {% if perms.mail.can_disable_mail or user == mail.owner and mail.status != "Завершена" %}
                 <form method="post" action="{% url 'mail:mail_stop' mail.id %}" class="d-grid gap-0"
                       style="margin: 0;">
                     {% csrf_token %}

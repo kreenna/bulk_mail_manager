@@ -40,7 +40,7 @@ class MessageForm(forms.ModelForm):
 class BulkMailForm(forms.ModelForm):
     class Meta:
         model = BulkMail
-        fields = ["name", "message", "receivers", "status"]
+        fields = ["name", "message", "receivers"]
         widgets = {
             "receivers": forms.SelectMultiple(),
         }

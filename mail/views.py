@@ -179,15 +179,6 @@ class BulkMailDetailView(LoginRequiredMixin, DetailView):
     template_name = "mail/mail_detail.html"
     context_object_name = "mail"
 
-    def get_queryset(self):
-        queryset = cache.get("bulk_mail_detail_queryset")
-        if not queryset:
-            queryset = super().get_queryset()
-            cache.set(
-                "bulk_mail_detail_queryset", queryset, 60 * 15
-            )  # кешируем данные на 15 минут
-        return queryset
-
 
 class BulkMailUpdateView(
     LoginRequiredMixin, OwnerRequiredMixin, BlockedUserMixin, UpdateView
@@ -195,6 +186,11 @@ class BulkMailUpdateView(
     model = BulkMail
     form_class = BulkMailForm
     template_name = "mail/mail_form.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def get_success_url(self):
         return reverse("mail:mail_detail", kwargs={"pk": self.object.pk})
@@ -204,7 +200,7 @@ class BulkMailStopView(LoginRequiredMixin, View):
     def post(self, request, pk):
         mail = get_object_or_404(BulkMail, id=pk)
 
-        if not request.user.groups.filter(name="managers").exists():
+        if request.user != mail.owner and not request.user.groups.filter(name="managers").exists():
             return HttpResponseForbidden("У вас нет прав для завершения рассылок.")
 
         mail.status = "Завершена"

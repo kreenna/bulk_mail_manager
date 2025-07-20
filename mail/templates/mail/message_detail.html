@@ -8,18 +8,21 @@
 
 <div class="container overflow-hidden text-center">
     <div class="col">
-        <div class="p-3">
-            <p class="fst-normal">{{ message.content }}</p>
+        <div class="d-grid gap-0 row-gap-3">
+            <div class="p-3">
+                <p class="fst-normal">{{ message.content }}</p>
+            </div>
+            {% if user == message.owner %}
+            <a class="p-2 btn btn-lg btn-outline-primary"
+               href="{% url 'mail:message_edit' message.id %}">Редактировать</a>
+            <form method="post" action="{% url 'mail:message_delete' message.id %}" class="d-grid gap-0"
+                  style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="p-2 btn btn-lg btn-outline-danger">Удалить</button>
+            </form>
+            {% endif %}
+            <a class="p-2 btn btn-lg btn-outline-primary" href="{% url 'mail:messages' %}">Назад</a>
         </div>
-        {% if user == receiver.owner %}
-        <a class="p-2 btn btn-lg btn-outline-primary" href="{% url 'mail:message_edit' message.id %}">Редактировать</a>
-        <form method="post" action="{% url 'mail:message_delete' message.id %}" class="d-grid gap-0"
-              style="margin: 0;">
-            {% csrf_token %}
-            <button type="submit" class="p-2 btn btn-lg btn-outline-danger">Удалить</button>
-        </form>
-        {% endif %}
-        <a class="p-2 btn btn-lg btn-outline-primary" href="{% url 'mail:messages' %}">Назад</a>
     </div>
 </div>
 {% endblock %}

@@ -5,8 +5,8 @@ from .models import BulkMailAttempt
 
 
 def send_bulk_mail(bulk_mail):
-    if bulk_mail.status == "created":
-        bulk_mail.status = "started"
+    if bulk_mail.status == "Создана":
+        bulk_mail.status = "Запущена"
         bulk_mail.sent_at = timezone.now()
         bulk_mail.save(update_fields=["status", "sent_at"])
 
@@ -37,9 +37,5 @@ def send_bulk_mail(bulk_mail):
                 response=response,
                 bulk_mail=bulk_mail,
             )
-
-    bulk_mail.status = "Завершена"
-    bulk_mail.finished_at = timezone.now()
-    bulk_mail.save(update_fields=["status", "finished_at"])
 
     return all_success, response
