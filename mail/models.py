@@ -54,7 +54,7 @@ class BulkMailAttempt(models.Model):
     STATUS_CHOICES = [("Успешно", "Успешно"), ("Не успешно", "Не успешно")]
 
     attempted_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="successful", verbose_name="Статус", )
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="Успешно", verbose_name="Статус")
     response = models.TextField()
     bulk_mail = models.ForeignKey(BulkMail, on_delete=models.CASCADE, related_name="attempts")
 
