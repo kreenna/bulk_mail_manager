@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Попытки{% endblock %}
+{% block content %}
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Ваши попытки</h1>
+</div>
+
+<div class="container text-center" style="max-width: 1100px;">
+    <div class="row justify-content-start row-cols-3">
+        {% for attempt in attempts %}
+        <div class="col-4 mt-3">
+            <div class="card box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">{{ attempt.attempted_at }}</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="card-title pricing-card-title">{{ attempt.status }}</h1>
+                    <ul class="list-unstyled mt-3 text-start m-3">
+                        <li>Рассылка: {{ attempt.bulk_mail.name }}</li>
+                        <li>{{ attempt.response }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

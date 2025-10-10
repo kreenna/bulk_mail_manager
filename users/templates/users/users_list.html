@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Рассылки{% endblock %}
+{% block content %}
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Пользователи</h1>
+</div>
+
+<div class="container text-center" style="max-width: 1100px;">
+    <div class="row justify-content-start row-cols-4">
+        {% for user in users %}
+        <div class="col-3 mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">{{ user.email }}</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="{% url 'users:profile' user.id %}">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

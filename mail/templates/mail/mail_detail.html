@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+{% block title %}Рассылка{% endblock %}
+{% block content %}
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">{{ mail.name }}</h1>
+</div>
+
+<div class="container overflow-hidden text-center">
+    <div class="row gx-5">
+        <div class="col">
+            <div class="p-3">
+                <h2 class="text-center">{{ mail.message.subject }}</h2>
+                <h4 class="text-center">{{ mail.message.content }}</h4>
+                <h5 class="text-center">Статус: {{ mail.status }}</h5>
+            </div>
+            <div class="d-grid gap-0 row-gap-3">
+                {% if user == mail.owner %}
+                {% if mail.status != "Завершена" %}
+                <form method="post" action="{% url 'mail:mail_send' mail.id %}" class="d-grid gap-0"
+                      style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2 btn btn-lg btn-outline-primary">Отправить рассылку
+                    </button>
+                </form>
+                {% endif %}
+                <a class="p-2 btn btn-lg btn-outline-primary"
+                   href="{% url 'mail:mail_edit' mail.id %}">Редактировать</a>
+                <form method="post" action="{% url 'mail:mail_delete' mail.id %}" class="d-grid gap-0"
+                      style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2 btn btn-lg btn-outline-danger">Удалить</button>
+                </form>
+                {% endif %}
+                {% if perms.mail.can_disable_mail or user == mail.owner and mail.status != "Завершена" %}
+                <form method="post" action="{% url 'mail:mail_stop' mail.id %}" class="d-grid gap-0"
+                      style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2 btn btn-lg btn-outline-danger">Завершить рассылку
+                    </button>
+                </form>
+                {% endif %}
+                <a class="p-2 btn btn-lg btn-outline-secondary" href="{% url 'mail:mails' %}">Назад</a>
+                <p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

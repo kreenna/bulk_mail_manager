@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+{% block title %}Спам-тон{% endblock %}
+{% block content %}
+
+<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Спам-тон</h1>
+    <p class="lead">Спам-тон - это отличный сайт для управления вашим спамом.</p>
+</div>
+
+<div class="container text-center" style="max-width: 1100px;">
+    <h3>Всего рассылок: {{ total_bulk_mails }}</h3>
+    <h3>Активных рассылок: {{ active_bulk_mails }}</h3>
+    <h3>Уникальных получателей: {{ unique_receivers }}</h3>
+</div>
+
+{% if user.is_authenticated %}
+<div class="container text-center" style="max-width: 1100px;">
+    <div class="row justify-content-start">
+        <div class="col mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Рассылки</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:mails' %}">Все рассылки</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Получатели</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:receivers' %}">Все получатели</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Сообщения</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:messages' %}">Все сообщения</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Попытки</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="{% url 'mail:attempts' %}">Все попытки</a>
+                </div>
+            </div>
+        </div>
+
+        {% if user|has_group:"managers" or user.is_staff %}
+        <div class="col mt-3">
+            <div class="card mb-4 box-shadow h-100">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Пользователи</h4>
+                </div>
+                <div class="card-body text-center">
+                    <a class="p-2 btn btn-primary" href="{% url 'users:users_list' %}">Все пользователи</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<div class="container text-center" style="max-width: 1100px;">
+    <p>
+    <h5>Для просмотра рассылок и создания своего спама, пожалуйста, авторизуйтесь.</h5>
+</div>
+
+{% endif %}
+{% endblock %}

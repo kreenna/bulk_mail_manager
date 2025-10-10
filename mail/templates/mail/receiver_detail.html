@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Получатель{% endblock %}
+{% block content %}
+<div class="container overflow-hidden">
+    <div class="row gx-5">
+        <div class="col">
+            <div class="p-3">
+                <h1 class="">{{ receiver.full_name }}</h1>
+                <div class="fs-5 mt-3">
+                    <p>Электронная почта: {{ receiver.email }}</p>
+                    <p>{{ receiver.comment }}</p>
+                </div>
+            </div>
+            <div class="d-grid gap-0 row-gap-3">
+                {% if user == receiver.owner %}
+                <a class="p-2 btn btn-lg btn-outline-primary"
+                   href="{% url 'mail:receiver_edit' receiver.id %}">Редактировать</a>
+                <form method="post" action="{% url 'mail:receiver_delete' receiver.id %}" class="d-grid gap-0"
+                      style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="p-2 btn btn-lg btn-outline-danger">Удалить</button>
+                </form>
+                {% endif %}
+                <a class="p-2 btn btn-lg btn-outline-secondary" href="{% url 'mail:receivers' %}">Назад</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% load user_tags %}
+
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+    <h5 class="my-0 mr-md-auto font-weight-normal">Skystore</h5>
+
+    <nav class="ms-5">
+        <a class="p-2 btn btn-outline-primary" href="{% url 'mail:home' %}">Главная</a>
+        {% if user.is_authenticated %}
+        <a class="p-2 btn btn-outline-primary" href="{% url 'mail:mails' %}">Рассылки</a>
+        <a class="p-2 btn btn-outline-primary" href="{% url 'mail:receivers' %}">Получатели</a>
+        <a class="p-2 btn btn-outline-primary" href="{% url 'mail:messages' %}">Сообщения</a>
+        <a class="p-2 btn btn-outline-primary" href="{% url 'mail:attempts' %}">Все попытки</a>
+        {% if user|has_group:"managers" or user.is_staff %}
+        <a class="p-2 btn btn-outline-primary" href="{% url 'users:users_list' %}">Пользователи</a>
+        {% endif %}
+        {% endif %}
+    </nav>
+
+    {% if user.is_authenticated %}
+    <div class="ms-md-auto">
+        <a class="p-2 btn btn-outline-primary " href="/profile/{{ user.id }}">Вы авторизованы как
+            {{user.first_name}}</a>
+        <form method="post" action="/logout/" style="display: inline;" class="ms-md-auto">
+            {% csrf_token %}
+            <button type="submit" class="p-2 btn btn-primary">Выйти
+            </button>
+        </form>
+    </div>
+
+    {% else %}
+    <div class="ms-md-auto">
+        <a class="p-2 btn btn-primary" href="{% url 'users:login' %}">Войти</a>
+        <a class="p-2 btn btn-outline-primary" href="{% url 'users:register' %}">Зарегистрироваться</a>
+    </div>
+
+    {% endif %}
+</div>
